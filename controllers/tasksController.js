@@ -5,17 +5,13 @@ export const listTasks = (req, res) => {
 };
 
 export const createTask = (req, res) => {
-  const { id, title, description, priority } = req.body;
+  const { id, title, description, priority} = req.body;
 
   if (!id || !title || !description || typeof priority !== 'number') {
     return res.status(400).json({ error: 'Datos inválidos' });
   }
 
-  if (priority < 1 || priority > 5) {
-    return res.status(400).json({ error: 'Prioridad fuera de rango' });
-  }
-
-  const task = { id, title, description, priority, completed: false };
+  const task = { id, title, description, priority, completed: false};
   const success = model.addTask(task);
 
   if (!success) {
@@ -47,4 +43,20 @@ export const deleteTask = (req, res) => {
   }
 
   res.status(200).json({ message: 'Tarea eliminada' });
+};
+
+export const getTasksByPriority = (req, res) => {
+  const level = Number(req.params.level);
+
+  if (level < 1 || level > 5) {
+    return res.status(400).json({ error: 'Nivel de prioridad fuera de rango' });
+  }
+
+  const filteredTasks = model.getAllTasks().filter(task => task.priority === level);
+
+  if (filteredTasks.length === 0) {
+    return res.status(404).json({ message: `No hay tareas con prioridad ${level}` });
+  }
+
+  res.json(filteredTasks);
 };
